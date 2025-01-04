@@ -141,6 +141,7 @@ builder.Services.AddRateLimiter(options =>
         opt.RejectionStatusCode = 429; // Change rejection status to 429
     });
 });
+```
 
 ## Notes
 
