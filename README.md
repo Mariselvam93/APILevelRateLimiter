@@ -94,21 +94,58 @@ This project demonstrates how to implement different rate limiting strategies in
 
 ---
 
+# Rate Limiter Configuration with 429 Status Code
+
+ Modify the rate limiter in an ASP.NET Core application to return **HTTP 429 (Too Many Requests)** instead of the default **HTTP 503 (Service Unavailable)** when the rate limit is exceeded.
+
+## Steps to Change Response Code to 429
+
+In the rate limiting configuration, you can set the `RejectionStatusCode` property to **429** for each limiter to indicate that the request has been throttled due to too many requests.
+
+### Updated Configuration Code:
+
+```csharp
+builder.Services.AddRateLimiter(options =>
+{
+    // 1. Fixed Window Limiter (20 requests per 2 minutes)
+    options.AddFixedWindowLimiter("fixed", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(2);
+        opt.PermitLimit = 20;
+        opt.RejectionStatusCode = 429; // Change rejection status to 429
+    });
+
+    // 2. Sliding Window Limiter (20 requests per 2 minutes, 4 segments)
+    options.AddSlidingWindowLimiter("sliding", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(2);
+        opt.PermitLimit = 20;
+        opt.SegmentsPerWindow = 4;
+        opt.RejectionStatusCode = 429; // Change rejection status to 429
+    });
+
+    // 3. Token Bucket Limiter (15 tokens max, refill 1 token/sec)
+    options.AddTokenBucketLimiter("token", opt =>
+    {
+        opt.TokenLimit = 15;
+        opt.TokensPerPeriod = 1;
+        opt.ReplenishmentPeriod = TimeSpan.FromSeconds(1);
+        opt.RejectionStatusCode = 429; // Change rejection status to 429
+    });
+
+    // 4. Concurrency Limiter (5 concurrent requests, 10 in queue)
+    options.AddConcurrencyLimiter("concurrency", opt =>
+    {
+        opt.PermitLimit = 5;
+        opt.QueueLimit = 10;
+        opt.RejectionStatusCode = 429; // Change rejection status to 429
+    });
+});
+
 ## Notes
 
 - Rate limiting is useful for controlling traffic, preventing abuse, and ensuring fair usage of system resources.
 - Each limiter can be customized by changing the configuration values in the `AddRateLimiter` method.
-- You can explore more options for rate limiting in the official [Microsoft documentation](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/rate-limit?view=aspnetcore-8.0).
+- You can explore more options for rate limiting in the official [Microsoft documentation](https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit?view=aspnetcore-9.0).
 
 ---
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
-
----
-
-## Acknowledgements
-
-- [ASP.NET Core Documentation](https://learn.microsoft.com/en-us/aspnet/core/)
-- [Rate Limiting in ASP.NET Core](https://devblogs.microsoft.com/dotnet/asp-net-core-rate-limiting/)
