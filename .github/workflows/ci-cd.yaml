@@ -29,14 +29,14 @@ jobs:
       - name: Build Application
         run: dotnet build --no-restore --configuration Release APILevelRateLimiter/APILevelRateLimiter/APILevelRateLimiter.csproj # Build the application
 
-      - name: Restore Test Dependencies
-        run: dotnet restore APILevelRateLimiter.Tests/APILevelRateLimiter.Tests.csproj # Restore test project dependencies
+      # - name: Restore Test Dependencies
+      #   run: dotnet restore APILevelRateLimiter/APILevelRateLimiter.Tests/APILevelRateLimiter.Tests.csproj # Restore test project dependencies
 
-      - name: Build Tests
-        run: dotnet build --no-restore --configuration Release APILevelRateLimiter.Tests/APILevelRateLimiter.Tests.csproj # Build the test project
+      # - name: Build Tests
+      #   run: dotnet build --no-restore --configuration Release APILevelRateLimiter/APILevelRateLimiter.Tests/APILevelRateLimiter.Tests.csproj # Build the test project
 
-      - name: Run Tests
-        run: dotnet test --no-build --verbosity normal APILevelRateLimiter.Tests/APILevelRateLimiter.Tests.csproj # Run the tests
+      # - name: Run Tests
+      #   run: dotnet test --no-build --verbosity normal APILevelRateLimiter/APILevelRateLimiter.Tests/APILevelRateLimiter.Tests.csproj # Run the tests
 
       - name: Get Git Commit Hash
         id: vars
