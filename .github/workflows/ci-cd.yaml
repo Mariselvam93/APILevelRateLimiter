@@ -1,0 +1,61 @@
+name: Build and Publish Docker Image for APILevelRateLimiter
+
+on:
+  push:
+    branches:
+      - main
+      - 'refs/tags/*' # Trigger on any tag push
+  pull_request:
+    branches:
+      - main # Trigger on pull requests to the main branch
+
+jobs:
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3 # Check out the repository code
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v3 # Set up .NET 8
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore Dependencies
+        run: dotnet restore APILevelRateLimiter/APILevelRateLimiter.csproj # Restore project dependencies
+
+      - name: Build Application
+        run: dotnet build --no-restore --configuration Release APILevelRateLimiter/APILevelRateLimiter.csproj # Build the application
+
+      - name: Publish Application
+        run: dotnet publish --no-build --configuration Release --output ./publish APILevelRateLimiter/APILevelRateLimiter.csproj # Publish the application
+
+      - name: Get Git Commit Hash
+        id: vars
+        run: echo "GIT_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV # Get the short commit hash and store it in the environment variable
+
+      - name: Build Docker Image
+        run: docker build -t myrepo/apilevelratelimiter:${{ github.sha }} -t myrepo/apilevelratelimiter:latest -f APILevelRateLimiter/Dockerfile . # Build the Docker image with commit hash and latest tags
+
+  push:
+    name: Push Docker Image
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3 # Check out the repository code
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin # Log in to Docker Hub using secrets
+
+      - name: Build Docker Image
+        run: docker build -t myrepo/apilevelratelimiter:${{ github.sha }} -t myrepo/apilevelratelimiter:latest -f APILevelRateLimiter/Dockerfile . # Build the Docker image again
+
+      - name: Push Docker Image
+        run: |
+          docker push myrepo/apilevelratelimiter:${{ github.sha }} # Push the Docker image with the commit hash tag
+          docker push myrepo/apilevelratelimiter:latest # Push the Docker image with the latest tag
+

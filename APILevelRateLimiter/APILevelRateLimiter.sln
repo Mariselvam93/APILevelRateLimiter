@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APILevelRateLimiter", "APILevelRateLimiter\APILevelRateLimiter.csproj", "{4327F8F5-4805-4C8B-BA3D-22B0C284807F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APILevelRateLimiter.Tests", "APILevelRateLimiter.Tests\APILevelRateLimiter.Tests.csproj", "{2B7905D1-56C4-402F-A3F3-B65ADEB5BF4C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +17,15 @@ Global
 		{4327F8F5-4805-4C8B-BA3D-22B0C284807F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4327F8F5-4805-4C8B-BA3D-22B0C284807F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4327F8F5-4805-4C8B-BA3D-22B0C284807F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B7905D1-56C4-402F-A3F3-B65ADEB5BF4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B7905D1-56C4-402F-A3F3-B65ADEB5BF4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B7905D1-56C4-402F-A3F3-B65ADEB5BF4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B7905D1-56C4-402F-A3F3-B65ADEB5BF4C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {95FDBFCA-7A84-4D7E-90DD-B422D1C58349}
 	EndGlobalSection
 EndGlobal
