@@ -37,7 +37,7 @@ jobs:
         run: echo "GIT_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV # Get the short commit hash and store it in the environment variable
 
       - name: Build Docker Image
-        run: docker build -t myrepo/apilevelratelimiter:${{ github.sha }} -t myrepo/apilevelratelimiter:latest -f APILevelRateLimiter/APILevelRateLimiter/APILevelRateLimiter/Dockerfile . # Build the Docker image with commit hash and latest tags
+        run: docker build -t myrepo/apilevelratelimiter:${{ github.sha }} -t myrepo/apilevelratelimiter:latest -f APILevelRateLimiter/APILevelRateLimiter/Dockerfile . # Build the Docker image with commit hash and latest tags
 
   push:
     name: Push Docker Image
