@@ -150,3 +150,137 @@ builder.Services.AddRateLimiter(options =>
 - You can explore more options for rate limiting in the official [Microsoft documentation](https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit?view=aspnetcore-9.0).
 
 ---
+
+
+
+# CI/CD Pipeline for APILevelRateLimiter
+
+This document outlines the steps to set up a CI/CD pipeline for the APILevelRateLimiter project using GitHub Actions. The pipeline includes building, testing, and publishing a Docker image to Docker Hub.
+
+## Prerequisites
+
+1. **GitHub Repository**: Ensure you have a GitHub repository for your project.
+2. **Docker Hub Account**: Ensure you have a Docker Hub account and a repository named `mariselvam93/myrepo`.
+
+## Adding Secrets to GitHub
+
+1. **Navigate to Your Repository**:  
+   - Go to your GitHub repository.
+2. **Go to Settings**:  
+   - Click on the **Settings** tab.
+3. **Access Secrets**:  
+   - In the left sidebar, click on **Secrets** and then **Actions**.
+4. **Add New Repository Secret**:  
+   - Click on the **New repository secret** button.
+5. **Add the Required Secrets**:  
+   - `DOCKER_USERNAME`: Your Docker Hub username.  
+   - `DOCKER_PASSWORD`: Your Docker Hub password.
+
+## GitHub Actions Workflow
+
+Create a file named `.github/workflows/ci-cd.yaml` in your repository with the following content:
+
+```yaml
+name: Build, Test, and Publish Docker Image for APILevelRateLimiter
+
+on:
+  push:
+    branches:
+      - main
+      - 'refs/tags/*' # Trigger on any tag push
+  pull_request:
+    branches:
+      - main # Trigger on pull requests to the main branch
+
+jobs:
+  build:
+    name: Build, Test, and Publish Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3 # Check out the repository code
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v3 # Set up .NET 8
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore Dependencies
+        run: dotnet restore APILevelRateLimiter/APILevelRateLimiter/APILevelRateLimiter.csproj # Restore project dependencies
+
+      - name: Build Application
+        run: dotnet build --no-restore --configuration Release APILevelRateLimiter/APILevelRateLimiter/APILevelRateLimiter.csproj # Build the application
+
+      - name: Get Git Commit Hash
+        id: vars
+        run: echo "GIT_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV # Get the short commit hash and store it in the environment variable
+
+      - name: Build Docker Image
+        run: docker build -t mariselvam93/myrepo:${{ github.sha }} -t mariselvam93/myrepo:latest -f APILevelRateLimiter/APILevelRateLimiter/Dockerfile . # Build the Docker image with commit hash and latest tags
+
+  push:
+    name: Push Docker Image
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Enable Debug Logging
+        run: echo "GITHUB_ACTIONS=true" >> $GITHUB_ENV
+
+      - name: Checkout Code
+        uses: actions/checkout@v3 # Check out the repository code
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin # Log in to Docker Hub using secrets
+
+      - name: Build Docker Image
+        run: docker build -t mariselvam93/myrepo:${{ github.sha }} -t mariselvam93/myrepo:latest -f APILevelRateLimiter/APILevelRateLimiter/Dockerfile . # Build the Docker image again
+
+      - name: Push Docker Image
+        run: |
+          docker push mariselvam93/myrepo:${{ github.sha }} # Push the Docker image with the commit hash tag
+          docker push mariselvam93/myrepo:latest # Push the Docker image with the latest tag
+```
+
+## Explanation
+
+1. **Trigger**:
+   - The workflow is triggered on pushes to the `main` branch and any tags (`refs/tags/*`), as well as pull requests to the `main` branch.
+
+2. **Build Job**:
+   - **Checkout Code**: Uses the `actions/checkout@v3` action to check out the repository code.
+   - **Set up .NET 8**: Uses the `actions/setup-dotnet@v3` action to set up .NET 8.
+   - **Restore Dependencies**: Runs `dotnet restore` to restore the project dependencies.
+   - **Build Application**: Runs `dotnet build` to build the application.
+   - **Get Git Commit Hash**: Retrieves the short commit hash and stores it in the environment variable `GIT_COMMIT`.
+   - **Build Docker Image**: Builds the Docker image with two tags: one using the commit hash (`${{ github.sha }}`) and one using `latest`.
+
+3. **Push Job**:
+   - **Enable Debug Logging**: Enables debug logging for more detailed output.
+   - **Checkout Code**: Uses the `actions/checkout@v3` action to check out the repository code.
+   - **Log in to Docker Hub**: Logs in to Docker Hub using the credentials stored in GitHub Secrets (`DOCKER_USERNAME` and `DOCKER_PASSWORD`).
+   - **Build Docker Image**: Builds the Docker image again (necessary because the build context is not shared between jobs).
+   - **Push Docker Image**: Pushes the Docker image with both the commit hash tag and the `latest` tag.
+
+## Testing Docker Hub Access
+
+To test Docker Hub access using the command line:
+
+1. **Log in to Docker Hub**:
+   ```sh
+   docker login
+   ```
+
+2. **Create a Test Image**:
+   ```sh
+   echo -e "FROM alpine:latest\nCMD [\"echo\", \"Hello, Docker Hub!\"]" > Dockerfile
+   docker build -t mariselvam93/test-image .
+   ```
+
+3. **Push the Test Image**:
+   ```sh
+   docker push mariselvam93/test-image
+   ```
+
+
